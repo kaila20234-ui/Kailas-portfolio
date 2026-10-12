@@ -1,0 +1,41 @@
+{
+  "name": "portfolio-fullstack",
+  "version": "1.0.0",
+  "description": "Full-stack developer portfolio — Node.js + TypeScript backend, HTML/CSS frontend.",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "hash-password": "ts-node scripts/hash-password.ts"
+  },
+  "keywords": [
+    "portfolio",
+    "typescript",
+    "node",
+    "express",
+    "admin"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "mongodb": "^7.7.0",
+    "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.0",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.14.9",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hafizu Salisu Kaila— Software Engineer</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body id="top">
+
+<div class="top-accent"></div>
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
+
+<header>
+  <nav class="wrap">
+    <div class="brand">~/<span>Hafizu Salisu Kaila</span></div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">about</a></li>
+      <li><a href="#skills">skills</a></li>
+      <li><a href="#projects">projects</a></li>
+      <li><a href="#experience">experience</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero" style="border-top:none;">
+    <div class="eyebrow">available for new roles</div>
+    <h1 class="name">Hafizu Salisu Kaila,<br>building <em>reliable</em> software.</h1>
+    <p class="role-line">Backend-leaning <strong>Software Engineer</strong> with 5 years shipping distributed systems, developer tools, and the occasional very stubborn bug.</p>
+    <div class="hero-actions">
+      <a href="#projects" class="btn btn-primary">View projects →</a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <span class="terminal-path">about.json</span>
+      </div>
+      <div class="terminal-body">
+        <div class="line">{</div>
+        <div class="line">&nbsp;&nbsp;<span class="key">"role"</span>: <span class="str">"Software Engineer"</span>,</div>
+        <div class="line">&nbsp;&nbsp;<span class="key">"focus"</span>: <span class="str">"frontend system, backend systems, dev tooling"</span>,</div>
+        <div class="line">&nbsp;&nbsp;<span class="key">"based_in"</span>: <span class="str">"kano, Nigeria"</span>,</div>
+        <div class="line">&nbsp;&nbsp;<span class="key">"open_to"</span>: <span class="str">"full-time, contract"</span><span class="cursor"></span></div>
+        <div class="line">}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-head reveal">
+      <div class="section-tag">// 01 about</div>
+      <h2 class="section-title">A little about me</h2>
+    </div>
+    <div class="about-grid reveal">
+      <div class="avatar" id="profilePhoto" aria-label="Profile photo">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>photo placeholder</span>
+      </div>
+      <div class="about-text">
+        <p>I'm a <strong>software engineer</strong> who enjoys the unglamorous parts of the job as much as the exciting ones: clean data models, honest error messages, and systems that behave the same way at 3am as they do in the demo.</p>
+        <p>Over the last several years I've worked across <strong>backend infrastructure, internal tooling, and API design</strong>, usually on small teams where everyone touches everything. I care about writing code that the next person — often future me — can actually understand.</p>
+        <p>Outside of work I like [hobby], [hobby], and slowly automating things that don't really need automating.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="section-head reveal">
+      <div class="section-tag">// 02 skills</div>
+      <h2 class="section-title">Tools I reach for</h2>
+    </div>
+    <div class="skill-groups reveal">
+      <div>
+        <div class="skill-group-label">Languages</div>
+        <div class="pill-row">
+          <span class="pill">TypeScript</span>
+          <span class="pill">Python</span>
+          <span class="pill">Go</span>
+          <span class="pill">SQL</span>
+        </div>
+      </div>
+      <div>
+        <div class="skill-group-label">Backend & Infra</div>
+        <div class="pill-row">
+          <span class="pill">Node.js</span>
+          <span class="pill">Express</span>
+          <span class="pill">PostgreSQL</span>
+          <span class="pill">Docker</span>
+        </div>
+      </div>
+      <div>
+        <div class="skill-group-label">Frontend</div>
+        <div class="pill-row">
+          <span class="pill">HTML5</span>
+          <span class="pill">CSS3</span>
+          <span class="pill">React</span>
+        </div>
+      </div>
+      <div>
+        <div class="skill-group-label">Practices</div>
+        <div class="pill-row">
+          <span class="pill">REST APIs</span>
+          <span class="pill">CI/CD</span>
+          <span class="pill">Testing</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS (rendered from GET /api/projects) -->
+  <section id="projects">
+    <div class="section-head reveal">
+      <div class="section-tag">// 03 projects</div>
+      <h2 class="section-title">Selected work</h2>
+    </div>
+    <div class="project-grid reveal" id="projectGrid">
+      <p class="state-msg">Loading projects…</p>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE (rendered from GET /api/experience) -->
+  <section id="experience">
+    <div class="section-head reveal">
+      <div class="section-tag">// 04 experience</div>
+      <h2 class="section-title">Where I've worked</h2>
+    </div>
+    <div class="timeline reveal" id="timeline">
+      <p class="state-msg">Loading experience…</p>
+    </div>
+  </section>
+
+  <!-- CONTACT (posts to POST /api/contact) -->
+  <section id="contact">
+    <div class="contact-panel reveal">
+      <div>
+        <h2>Let's build something together.</h2>
+        <p>Open to full-time roles, contract work, and interesting problems. Reach out — I usually reply within a day or two.</p>
+        <a class="whatsapp-card" href="https://wa.me/2349012892640" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp at +234 901 289 2640">
+          <span class="whatsapp-mark" aria-hidden="true">WA</span>
+          <span class="whatsapp-card-copy">
+            <strong>WhatsApp me</strong>
+            <span>+234 901 289 2640</span>
+            <small>Tap to start a chat</small>
+          </span>
+          <span class="whatsapp-card-arrow" aria-hidden="true">↗</span>
+        </a>
+        <div class="social-col">
+          <a href="mailto:you@example.com">Email <span>→</span></a>
+          <a href="#">GitHub <span>→</span></a>
+          <a href="#">LinkedIn <span>→</span></a>
+          <a id="resumeLink" hidden>Resume (PDF) <span>→</span></a>
+        </div>
+      </div>
+
+      <form class="contact-form" id="contactForm" novalidate>
+        <div class="field">
+          <label for="cf-name">Name</label>
+          <input type="text" id="cf-name" name="name" autocomplete="name">
+          <div class="field-error" data-error-for="name"></div>
+        </div>
+        <div class="field">
+          <label for="cf-email">Email</label>
+          <input type="email" id="cf-email" name="email" autocomplete="email">
+          <div class="field-error" data-error-for="email"></div>
+        </div>
+        <div class="field">
+          <label for="cf-message">Message</label>
+          <textarea id="cf-message" name="message" rows="4"></textarea>
+          <div class="field-error" data-error-for="message"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="cf-submit">Send message</button>
+        <div class="form-status" id="cf-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<a class="whatsapp-float" href="https://wa.me/2349012892640" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp at +234 901 289 2640">
+  <span class="whatsapp-float-mark" aria-hidden="true">WA</span>
+  <span><strong>Chat on WhatsApp</strong><small>+234 901 289 2640</small></span>
+</a>
+
+<footer>
+  © 2026 Hafizu Salisu Kaila <span style="color:var(--gold);margin:0 8px;">·</span> <a href="#top" style="border-bottom:1px solid var(--navy-line);">back to top</a>
+</footer>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

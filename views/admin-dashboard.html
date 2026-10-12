@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/admin-assets/admin.css">
+</head>
+<body>
+
+<div class="admin-shell">
+  <div class="admin-header">
+    <div>
+      <p class="admin-kicker">Portfolio control room</p>
+      <h1>Admin dashboard</h1>
+    </div>
+    <div class="admin-header-actions">
+      <a href="/" class="btn btn-ghost" target="_blank" rel="noopener">View site →</a>
+      <button class="btn btn-ghost" id="logoutBtn" type="button">Log out</button>
+    </div>
+  </div>
+
+  <nav class="admin-nav" role="tablist" aria-label="Dashboard sections">
+    <button type="button" class="admin-tab" id="tab-projects" role="tab" aria-controls="projects" aria-selected="true" data-tab="projects">Projects</button>
+    <button type="button" class="admin-tab" id="tab-contacts" role="tab" aria-controls="contacts" aria-selected="false" tabindex="-1" data-tab="contacts">Contact inbox <span id="unreadBadge" class="nav-count">0</span></button>
+    <button type="button" class="admin-tab" id="tab-experience" role="tab" aria-controls="experience" aria-selected="false" tabindex="-1" data-tab="experience">Experience</button>
+    <button type="button" class="admin-tab" id="tab-uploads" role="tab" aria-controls="uploads" aria-selected="false" tabindex="-1" data-tab="uploads">Uploads</button>
+  </nav>
+
+  <section class="dashboard-overview" aria-label="Portfolio overview">
+    <div class="overview-card">
+      <span class="overview-label">Projects</span>
+      <strong id="projectCount">—</strong>
+    </div>
+    <div class="overview-card">
+      <span class="overview-label">Experience entries</span>
+      <strong id="experienceCount">—</strong>
+    </div>
+    <div class="overview-card">
+      <span class="overview-label">Unread messages</span>
+      <strong id="unreadCount">—</strong>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="admin-panel" id="projects" role="tabpanel" aria-labelledby="tab-projects">
+    <div class="panel-heading">
+      <div>
+        <p class="admin-kicker">Portfolio content</p>
+        <h2>Projects</h2>
+      </div>
+      <div class="project-heading-actions">
+        <button type="button" class="btn btn-primary" id="toggleProjectForm" aria-haspopup="dialog">Add a project</button>
+        <span class="panel-hint">Manage the work visitors see first</span>
+      </div>
+    </div>
+    <div class="form-status project-notice" id="projectNotice" role="status" aria-live="polite"></div>
+    <div class="admin-list" id="projectList">
+      <p class="empty-msg">Loading…</p>
+    </div>
+  </section>
+
+  <dialog class="project-dialog" id="projectDialog" aria-labelledby="projectFormTitle">
+    <div class="project-dialog-header">
+      <h2 id="projectFormTitle">Add a project</h2>
+      <button type="button" class="dialog-close" id="projectDialogClose" aria-label="Close dialog">×</button>
+    </div>
+    <form class="admin-form" id="projectForm">
+      <div class="full">
+        <label for="p-name">Name</label>
+        <input type="text" id="p-name" required>
+      </div>
+      <div class="full">
+        <label for="p-desc">Description</label>
+        <textarea id="p-desc" rows="2" required></textarea>
+      </div>
+      <div>
+        <label for="p-tags">Tags (comma separated)</label>
+        <input type="text" id="p-tags" placeholder="Node.js, Postgres, Redis">
+      </div>
+      <div>
+        <label for="p-live">Live URL</label>
+        <input type="text" id="p-live" placeholder="https://...">
+      </div>
+      <div class="full">
+        <label for="p-source">Source URL</label>
+        <input type="text" id="p-source" placeholder="https://github.com/...">
+      </div>
+      <div class="full-actions">
+        <button type="submit" class="btn btn-primary" id="projectSubmit">Add project</button>
+        <button type="button" class="btn btn-ghost" id="projectCancel">Cancel</button>
+        <span class="form-status" id="projectStatus"></span>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- CONTACT INBOX -->
+  <section class="admin-panel" id="contacts" role="tabpanel" aria-labelledby="tab-contacts" hidden>
+    <div class="panel-heading">
+      <div>
+        <p class="admin-kicker">Messages from your site</p>
+        <h2>Contact inbox</h2>
+      </div>
+      <div class="inbox-heading-actions">
+        <span class="panel-hint">Newest messages appear first</span>
+        <button type="button" class="panel-action" id="refreshContacts">Refresh inbox</button>
+      </div>
+    </div>
+    <div class="admin-list" id="contactList" aria-live="polite">
+      <p class="empty-msg">Loading messages…</p>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="admin-panel" id="experience" role="tabpanel" aria-labelledby="tab-experience" hidden>
+    <div class="panel-heading">
+      <div>
+        <p class="admin-kicker">Portfolio content</p>
+        <h2>Experience</h2>
+      </div>
+      <div class="project-heading-actions">
+        <button type="button" class="btn btn-primary" id="toggleExperienceForm" aria-haspopup="dialog">Add an experience entry</button>
+      </div>
+    </div>
+    <div class="form-status project-notice" id="experienceNotice" role="status" aria-live="polite"></div>
+    <div class="admin-list" id="experienceList">
+      <p class="empty-msg">Loading…</p>
+    </div>
+  </section>
+
+  <dialog class="project-dialog" id="experienceDialog" aria-labelledby="experienceDialogTitle">
+    <div class="project-dialog-header">
+      <h2 id="experienceDialogTitle">Add an experience entry</h2>
+      <button type="button" class="dialog-close" id="experienceDialogClose" aria-label="Close dialog">×</button>
+    </div>
+    <form class="admin-form" id="experienceForm">
+      <div>
+        <label for="e-dates">Date range</label>
+        <input type="text" id="e-dates" placeholder="2024 — Present" required>
+      </div>
+      <div>
+        <label for="e-role">Role</label>
+        <input type="text" id="e-role" required>
+      </div>
+      <div class="full">
+        <label for="e-org">Organization</label>
+        <input type="text" id="e-org" required>
+      </div>
+      <div class="full">
+        <label for="e-desc">Description</label>
+        <textarea id="e-desc" rows="2" required></textarea>
+      </div>
+      <div class="full-actions">
+        <button type="submit" class="btn btn-primary">Add experience</button>
+        <button type="button" class="btn btn-ghost" id="experienceCancel">Cancel</button>
+        <span class="form-status" id="experienceStatus"></span>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- UPLOADS -->
+  <section class="admin-panel" id="uploads" role="tabpanel" aria-labelledby="tab-uploads" hidden>
+    <div class="panel-heading">
+      <div>
+        <p class="admin-kicker">Profile assets</p>
+        <h2>Upload a photo or resume</h2>
+      </div>
+    </div>
+    <form class="admin-form" id="uploadForm">
+      <div class="full">
+        <label for="u-file">File (PNG, JPG, WEBP, or PDF — max 5MB)</label>
+        <input type="file" id="u-file" accept=".png,.jpg,.jpeg,.webp,.pdf" required>
+      </div>
+      <div class="full-actions">
+        <button type="submit" class="btn btn-primary">Upload</button>
+        <span class="form-status" id="uploadStatus"></span>
+      </div>
+    </form>
+    <p class="empty-msg" style="margin-top:14px;">
+      Images replace the public profile photo. PDFs update the public resume link.
+    </p>
+  </section>
+</div>
+
+<script>
+  // ---- Dashboard tabs ----
+  const dashboardTabs = Array.from(document.querySelectorAll('.admin-tab'));
+  const dashboardPanels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+  function activateTab(tabName, updateLocation = true) {
+    const selectedTab = dashboardTabs.find(tab => tab.dataset.tab === tabName) || dashboardTabs[0];
+    dashboardTabs.forEach(tab => {
+      const selected = tab === selectedTab;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+    });
+    dashboardPanels.forEach(panel => {
+      panel.hidden = panel.id !== selectedTab.dataset.tab;
+    });
+    if (updateLocation && window.location.hash !== `#${selectedTab.dataset.tab}`) {
+      window.history.replaceState(null, '', `#${selectedTab.dataset.tab}`);
+    }
+  }
+
+  dashboardTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+    tab.addEventListener('keydown', event => {
+      let nextIndex;
+      if (event.key === 'ArrowRight') nextIndex = (index + 1) % dashboardTabs.length;
+      if (event.key === 'ArrowLeft') nextIndex = (index - 1 + dashboardTabs.length) % dashboardTabs.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = dashboardTabs.length - 1;
+      if (nextIndex === undefined) return;
+      event.preventDefault();
+      dashboardTabs[nextIndex].focus();
+      activateTab(dashboardTabs[nextIndex].dataset.tab);
+    });
+  });
+
+  activateTab(window.location.hash.slice(1), false);
+
+  // ---- Logout ----
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await fetch('/admin/logout', { method: 'POST' });
+    window.location.href = '/admin/login';
+  });
+
+  // ---- Helpers ----
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+  }
+
+  let editingProjectId = null;
+  let projectsById = new Map();
+
+  function openProjectForm() {
+    const dialog = document.getElementById('projectDialog');
+    if (!dialog.open) dialog.showModal();
+    document.getElementById('projectNotice').textContent = '';
+    document.getElementById('projectNotice').className = 'form-status project-notice';
+    document.getElementById('p-name').focus();
+  }
+
+  async function api(url, options = {}) {
+    const res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+    if (res.status === 401) {
+      window.location.href = '/admin/login';
+      throw new Error('Not authenticated');
+    }
+    if (!res.ok && res.status !== 204) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Request failed');
+    }
+    return res.status === 204 ? null : res.json();
+  }
+
+  // ---- Projects ----
+  async function loadProjects() {
+    const list = document.getElementById('projectList');
+    let projects;
+    try {
+      ({ projects } = await api('/api/projects'));
+    } catch (err) {
+      if (err.message !== 'Not authenticated') {
+        list.innerHTML = '<p class="empty-msg">Could not load projects. Please refresh to try again.</p>';
+      }
+      return;
+    }
+    projectsById = new Map(projects.map(project => [project.id, project]));
+    document.getElementById('projectCount').textContent = projects.length;
+    if (!projects.length) {
+      list.innerHTML = '<p class="empty-msg">No projects yet — add one below.</p>';
+      return;
+    }
+    list.innerHTML = projects.map(p => `
+      <article class="admin-row project-row" data-id="${escapeHtml(p.id)}">
+        <div class="admin-row-main">
+          <div class="admin-row-title">${escapeHtml(p.name)}</div>
+          <p class="project-row-description">${escapeHtml(p.description)}</p>
+          <div class="admin-row-sub">${(p.tags || []).map(escapeHtml).join(' · ') || 'No tags'}</div>
+        </div>
+        <div class="admin-row-actions">
+          <button type="button" class="edit-project">Edit</button>
+          <button type="button" class="delete-project" data-id="${escapeHtml(p.id)}">Delete</button>
+        </div>
+      </article>
+    `).join('');
+
+    list.querySelectorAll('.edit-project').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const project = projectsById.get(btn.closest('.admin-row').dataset.id);
+        if (!project) return;
+        editingProjectId = project.id;
+        document.getElementById('p-name').value = project.name;
+        document.getElementById('p-desc').value = project.description;
+        document.getElementById('p-tags').value = (project.tags || []).join(', ');
+        document.getElementById('p-live').value = project.liveUrl || '';
+        document.getElementById('p-source').value = project.sourceUrl || '';
+        document.getElementById('projectFormTitle').textContent = 'Edit project';
+        document.getElementById('projectSubmit').textContent = 'Save changes';
+        document.getElementById('projectCancel').hidden = false;
+        document.getElementById('projectStatus').textContent = '';
+        openProjectForm();
+        document.getElementById('projectForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById('p-name').focus({ preventScroll: true });
+      });
+    });
+
+    list.querySelectorAll('.delete-project').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this project?')) return;
+        try {
+          await api(`/api/admin/projects/${btn.dataset.id}`, { method: 'DELETE' });
+          if (editingProjectId === btn.dataset.id) resetProjectForm();
+          await loadProjects();
+        } catch (err) {
+          if (err.message !== 'Not authenticated') alert(`Could not delete project: ${err.message}`);
+        }
+      });
+    });
+  }
+
+  function resetProjectForm() {
+    editingProjectId = null;
+    document.getElementById('projectForm').reset();
+    document.getElementById('projectFormTitle').textContent = 'Add a project';
+    document.getElementById('projectSubmit').textContent = 'Add project';
+    document.getElementById('projectStatus').textContent = '';
+    document.getElementById('projectStatus').className = 'form-status';
+    const dialog = document.getElementById('projectDialog');
+    if (dialog.open) dialog.close();
+  }
+
+  document.getElementById('toggleProjectForm').addEventListener('click', () => {
+    resetProjectForm();
+    openProjectForm();
+  });
+
+  document.getElementById('projectCancel').addEventListener('click', resetProjectForm);
+  document.getElementById('projectDialogClose').addEventListener('click', resetProjectForm);
+  document.getElementById('projectDialog').addEventListener('click', event => {
+    if (event.target === event.currentTarget) resetProjectForm();
+  });
+  document.getElementById('projectDialog').addEventListener('close', () => {
+    if (editingProjectId) resetProjectForm();
+  });
+
+  document.getElementById('projectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const status = document.getElementById('projectStatus');
+    status.textContent = '';
+    status.className = 'form-status';
+
+    const body = {
+      name: document.getElementById('p-name').value.trim(),
+      description: document.getElementById('p-desc').value.trim(),
+      tags: document.getElementById('p-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+      liveUrl: document.getElementById('p-live').value.trim() || undefined,
+      sourceUrl: document.getElementById('p-source').value.trim() || undefined,
+    };
+
+    try {
+      await api(editingProjectId ? `/api/admin/projects/${editingProjectId}` : '/api/admin/projects', {
+        method: editingProjectId ? 'PUT' : 'POST',
+        body: JSON.stringify(body),
+      });
+      const wasEditing = Boolean(editingProjectId);
+      resetProjectForm();
+      const notice = document.getElementById('projectNotice');
+      notice.textContent = wasEditing ? 'Project updated.' : 'Project added.';
+      notice.classList.add('success');
+      await loadProjects();
+    } catch (err) {
+      status.textContent = err.message;
+      status.classList.add('error');
+    }
+  });
+
+  // ---- Experience ----
+  async function loadExperience() {
+    const list = document.getElementById('experienceList');
+    let experience;
+    try {
+      ({ experience } = await api('/api/experience'));
+    } catch (err) {
+      if (err.message !== 'Not authenticated') {
+        list.innerHTML = '<p class="empty-msg">Could not load experience. Please refresh to try again.</p>';
+      }
+      return;
+    }
+    document.getElementById('experienceCount').textContent = experience.length;
+    if (!experience.length) {
+      list.innerHTML = '<p class="empty-msg">No experience entries yet — add one below.</p>';
+      return;
+    }
+    list.innerHTML = experience.map(ex => `
+      <article class="admin-row" data-id="${escapeHtml(ex.id)}">
+        <div class="admin-row-main">
+          <div class="admin-row-title">${escapeHtml(ex.role)} · ${escapeHtml(ex.org)}</div>
+          <div class="admin-row-sub">${escapeHtml(ex.dateRange)}</div>
+        </div>
+        <div class="admin-row-actions">
+          <button type="button" class="delete-exp" data-id="${escapeHtml(ex.id)}">Delete</button>
+        </div>
+      </article>
+    `).join('');
+
+    list.querySelectorAll('.delete-exp').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this experience entry?')) return;
+        try {
+          await api(`/api/admin/experience/${btn.dataset.id}`, { method: 'DELETE' });
+          await loadExperience();
+        } catch (err) {
+          if (err.message !== 'Not authenticated') alert(`Could not delete experience: ${err.message}`);
+        }
+      });
+    });
+  }
+
+  function resetExperienceForm() {
+    document.getElementById('experienceForm').reset();
+    document.getElementById('experienceStatus').textContent = '';
+    document.getElementById('experienceStatus').className = 'form-status';
+    const dialog = document.getElementById('experienceDialog');
+    if (dialog.open) dialog.close();
+  }
+
+  document.getElementById('toggleExperienceForm').addEventListener('click', () => {
+    resetExperienceForm();
+    document.getElementById('experienceNotice').textContent = '';
+    document.getElementById('experienceNotice').className = 'form-status project-notice';
+    document.getElementById('experienceDialog').showModal();
+    document.getElementById('e-dates').focus();
+  });
+  document.getElementById('experienceCancel').addEventListener('click', resetExperienceForm);
+  document.getElementById('experienceDialogClose').addEventListener('click', resetExperienceForm);
+  document.getElementById('experienceDialog').addEventListener('click', event => {
+    if (event.target === event.currentTarget) resetExperienceForm();
+  });
+  document.getElementById('experienceDialog').addEventListener('close', () => {
+    resetExperienceForm();
+  });
+
+  document.getElementById('experienceForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const status = document.getElementById('experienceStatus');
+    status.textContent = '';
+    status.className = 'form-status';
+
+    const body = {
+      dateRange: document.getElementById('e-dates').value.trim(),
+      role: document.getElementById('e-role').value.trim(),
+      org: document.getElementById('e-org').value.trim(),
+      description: document.getElementById('e-desc').value.trim(),
+    };
+
+    try {
+      await api('/api/admin/experience', { method: 'POST', body: JSON.stringify(body) });
+      resetExperienceForm();
+      const notice = document.getElementById('experienceNotice');
+      notice.textContent = 'Experience entry added.';
+      notice.classList.add('success');
+      await loadExperience();
+    } catch (err) {
+      status.textContent = err.message;
+      status.classList.add('error');
+    }
+  });
+
+  // ---- Contact inbox ----
+  async function loadContacts() {
+    const list = document.getElementById('contactList');
+    let contacts;
+    try {
+      ({ contacts } = await api('/api/admin/contacts'));
+    } catch (err) {
+      if (err.message !== 'Not authenticated') {
+        list.innerHTML = '<p class="empty-msg">Could not load messages. Please refresh to try again.</p>';
+      }
+      return;
+    }
+
+    const unread = contacts.filter(contact => !contact.isRead).length;
+    document.getElementById('unreadCount').textContent = unread;
+    document.getElementById('unreadBadge').textContent = unread;
+    document.getElementById('unreadBadge').hidden = unread === 0;
+    if (!contacts.length) {
+      list.innerHTML = '<p class="empty-msg">No messages yet. New contact form submissions will appear here.</p>';
+      return;
+    }
+
+    list.innerHTML = contacts.map(contact => `
+      <article class="admin-row contact-row${contact.isRead ? '' : ' unread'}" data-id="${escapeHtml(contact.id)}">
+        <div class="contact-content">
+          <div class="contact-heading">
+            <div>
+              <div class="admin-row-title">${escapeHtml(contact.name)}</div>
+              <a class="contact-email" href="mailto:${escapeHtml(contact.email)}">${escapeHtml(contact.email)}</a>
+            </div>
+            <time class="admin-row-sub" datetime="${escapeHtml(contact.receivedAt)}">${escapeHtml(new Date(contact.receivedAt).toLocaleString())}</time>
+          </div>
+          <details class="contact-details">
+            <summary>${contact.isRead ? 'View message' : 'Read message'}</summary>
+            <p class="contact-message">${escapeHtml(contact.message)}</p>
+          </details>
+          <span class="contact-state${contact.handled ? ' is-handled' : ''}">${contact.handled ? 'Handled' : 'Needs follow-up'}</span>
+        </div>
+        <div class="admin-row-actions contact-actions">
+          <button type="button" class="toggle-read">${contact.isRead ? 'Mark unread' : 'Mark read'}</button>
+          <button type="button" class="toggle-handled">${contact.handled ? 'Reopen' : 'Mark handled'}</button>
+          <button type="button" class="danger delete-contact">Delete</button>
+        </div>
+      </article>
+    `).join('');
+
+    list.querySelectorAll('.contact-row').forEach(row => {
+      const contact = contacts.find(item => item.id === row.dataset.id);
+      const details = row.querySelector('.contact-details');
+      details.addEventListener('toggle', async () => {
+        if (details.open && contact && !contact.isRead) {
+          try {
+            await api(`/api/admin/contacts/${contact.id}`, {
+              method: 'PATCH',
+              body: JSON.stringify({ isRead: true }),
+            });
+            contact.isRead = true;
+            row.classList.remove('unread');
+            details.querySelector('summary').textContent = 'View message';
+            row.querySelector('.toggle-read').textContent = 'Mark unread';
+            const unreadCount = list.querySelectorAll('.contact-row.unread').length;
+            document.getElementById('unreadCount').textContent = unreadCount;
+            document.getElementById('unreadBadge').textContent = unreadCount;
+            document.getElementById('unreadBadge').hidden = unreadCount === 0;
+          } catch (err) {
+            if (err.message !== 'Not authenticated') alert(`Could not update message: ${err.message}`);
+          }
+        }
+      });
+      row.querySelector('.toggle-read').addEventListener('click', () => updateContact(contact.id, { isRead: !contact.isRead }));
+      row.querySelector('.toggle-handled').addEventListener('click', () => updateContact(contact.id, { handled: !contact.handled }));
+      row.querySelector('.delete-contact').addEventListener('click', async () => {
+        if (!confirm('Delete this contact message? This cannot be undone.')) return;
+        try {
+          await api(`/api/admin/contacts/${contact.id}`, { method: 'DELETE' });
+          await loadContacts();
+        } catch (err) {
+          if (err.message !== 'Not authenticated') alert(`Could not delete message: ${err.message}`);
+        }
+      });
+    });
+  }
+
+  async function updateContact(id, update) {
+    try {
+      await api(`/api/admin/contacts/${id}`, { method: 'PATCH', body: JSON.stringify(update) });
+      await loadContacts();
+    } catch (err) {
+      if (err.message !== 'Not authenticated') alert(`Could not update message: ${err.message}`);
+    }
+  }
+
+  document.getElementById('refreshContacts').addEventListener('click', loadContacts);
+
+  // ---- Upload ----
+  document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const status = document.getElementById('uploadStatus');
+    status.textContent = '';
+    status.className = 'form-status';
+
+    const fileInput = document.getElementById('u-file');
+    if (!fileInput.files[0]) return;
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    try {
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+      if (res.status === 401) { window.location.href = '/admin/login'; return; }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      status.textContent = `${data.asset === 'resumeUrl' ? 'Public resume updated' : 'Public profile photo updated'}: ${data.url}`;
+      status.classList.add('success');
+      e.target.reset();
+    } catch (err) {
+      status.textContent = err.message;
+      status.classList.add('error');
+    }
+  });
+
+  loadProjects();
+  loadContacts();
+  loadExperience();
+</script>
+
+</body>
+</html>
