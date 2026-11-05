@@ -1,7 +1,7 @@
 {
   "functions": {
     "src/server.ts": {
-      "includeFiles": ["public/**", "views/**", "admin/**"]
+      "includeFiles": "{public/**,views/**,admin/**}"
     }
   }
 }
