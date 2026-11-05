@@ -1,5 +1,10 @@
 import bcrypt from "bcryptjs";
 
+declare const process: {
+  argv: string[];
+  exit(code?: number): never;
+};
+
 const password = process.argv[2];
 
 if (!password) {

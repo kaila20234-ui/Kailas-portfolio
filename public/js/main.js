@@ -38,6 +38,7 @@ async function loadProjects() {
           <div class="project-links">
             ${p.liveUrl ? `<a href="${p.liveUrl}">Live site</a>` : ''}
             ${p.sourceUrl ? `<a href="${p.sourceUrl}">Source</a>` : ''}
+            ${p.apkUrl ? `<a class="project-download" href="${escapeAttribute(p.apkUrl)}" download>Download APK</a>` : ''}
           </div>
         </div>
       </div>
@@ -100,6 +101,10 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+function escapeAttribute(str) {
+  return escapeHtml(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // ---- Contact form ----

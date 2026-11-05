@@ -8,10 +8,9 @@ the API — no build step needed on the frontend.
 
 ## Stack
 
-- **Backend:** Node.js, TypeScript, Express, express-session, bcryptjs, multer
+- **Backend:** Node.js, TypeScript, Express, express-session, bcryptjs, multer, Cloudinary
 - **Frontend:** HTML5, CSS3, vanilla JavaScript (fetch API)
-- **Data:** MongoDB stores projects, experience, contact messages, and profile asset URLs.
-   Uploaded files remain in `public/uploads/`.
+- **Data:** MongoDB stores projects, experience, contact messages, and Cloudinary profile asset URLs.
 
 ## Project structure
 
@@ -41,7 +40,6 @@ portfolio-fullstack/
 │   ├── index.html
 │   ├── css/style.css
 │   ├── js/main.js              # Fetches data from the API, handles the contact form
-│   └── uploads/                # Uploaded photos/resumes land here
 ├── scripts/
 │   └── hash-password.ts        # CLI to generate your admin password hash
 ├── package.json
@@ -89,11 +87,13 @@ npm run typecheck   # type-checks without emitting files
 1. Go to `http://localhost:5000/admin/login` and sign in with the
    username/password you set in `.env`.
 2. You'll land on `/admin`, where you can:
-   - Add, edit, or delete **projects** (name, description, tags, live/source URLs)
+   - Add, edit, or delete **projects** (name, description, tags, and live/source URLs)
    - Review the **contact inbox**, mark messages read or handled, and delete them
    - Add or delete **experience** entries (dates, role, org, description)
-   - **Upload** a photo or resume (PNG/JPG/WEBP/PDF, 5MB max) — images replace the public
-       profile photo and PDFs update the public resume link
+   - **Upload** a photo or resume (PNG/JPG/WEBP/PDF, 4MB max) — images replace the public
+       profile photo and PDFs update the public resume link; files are hosted in Cloudinary
+   - Use the separate **APK uploads** tab to attach an Android APK to a project (up to 100MB);
+     project cards then show a **Download APK** link.
 3. Changes save to MongoDB and appear on the public site immediately — no restart needed.
 4. Click **Log out** when you're done, or the session expires after 8 hours.
 
@@ -112,12 +112,15 @@ endpoints (`/api/projects`, `/api/experience`, `/api/profile-assets`) stay open 
    MongoDB; review and manage them in the protected admin inbox. Submissions made
    before inbox storage was added were only logged to the server console and are
    not available in the dashboard. Email notifications are not configured.
-3. **Deploying:** any Node host works (Render, Railway, Fly.io, a VPS, etc.).
-   Run `npm run build` then `npm start`. Set `PORT`, `ADMIN_USERNAME`,
-   `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`, and `SESSION_SECURE_COOKIE=true`
-   (once you're on HTTPS) as environment variables on your host.
-   Set `MONGODB_URI` to your production database. `public/uploads/` should live on
-   persistent storage or be replaced with object storage if your host has an ephemeral filesystem.
+3. **Deploying to Vercel:** import the GitHub repository as a Node/Express project.
+   Leave the root directory at the repository root; Vercel detects the Express app
+   in `src/server.ts`. Add `MONGODB_URI`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`,
+   `SESSION_SECRET`, `SESSION_SECURE_COOKIE=true`, `CLOUDINARY_CLOUD_NAME`,
+   `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` as Vercel environment
+   variables. `MONGODB_DB` is optional. Vercel sets `NODE_ENV`; `PORT` is only
+   used when running the server locally.
+   Uploaded photos and resumes are stored in Cloudinary; portfolio content and
+   admin sessions are stored in MongoDB Atlas.
 
 ## API reference
 
@@ -138,6 +141,7 @@ endpoints (`/api/projects`, `/api/experience`, `/api/profile-assets`) stay open 
 | POST   | `/api/admin/projects`       | Protected | Create a project |
 | PUT    | `/api/admin/projects/:id`   | Protected | Update a project |
 | DELETE | `/api/admin/projects/:id`   | Protected | Delete a project |
+| POST   | `/api/admin/apk-upload-signature` | Protected | Sign a direct APK upload to Cloudinary |
 | POST   | `/api/admin/experience`     | Protected | Create an experience entry |
 | PUT    | `/api/admin/experience/:id` | Protected | Update an experience entry |
 | DELETE | `/api/admin/experience/:id` | Protected | Delete an experience entry |

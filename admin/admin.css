@@ -109,11 +109,11 @@
   display:block;font-family:var(--font-mono);font-size:11px;color:var(--slate);
   text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;
 }
-.admin-form input, .admin-form textarea{
+.admin-form input, .admin-form textarea, .admin-form select{
   width:100%;background:var(--navy-deep);border:1px solid var(--navy-line);border-radius:6px;
   padding:10px 12px;color:var(--ivory);font-family:var(--font-body);font-size:14px;resize:vertical;
 }
-.admin-form input:focus, .admin-form textarea:focus{border-color:var(--gold);outline:none;}
+.admin-form input:focus, .admin-form textarea:focus, .admin-form select:focus{border-color:var(--gold);outline:none;}
 .admin-form .full-actions{grid-column:1 / -1;display:flex;gap:12px;align-items:center;margin-top:6px;}
 
 .empty-msg{font-family:var(--font-mono);font-size:13px;color:var(--slate-dim);}

@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "path";
 import dotenv from "dotenv";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import portfolioRoutes from "./routes/portfolio.route";
 import contactRoutes from "./routes/contact.route";
 import authRoutes from "./routes/auth.route";
@@ -13,8 +14,27 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 5000;
+let storeConnection: Promise<void> | undefined;
 
-if (!process.env.SESSION_SECRET) {
+function ensureStoreConnected(): Promise<void> {
+  if (!storeConnection) {
+    storeConnection = connectStore().catch((error: unknown) => {
+      storeConnection = undefined;
+      throw error;
+    });
+  }
+  return storeConnection;
+}
+
+if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+  app.set("trust proxy", 1);
+}
+
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret && process.env.NODE_ENV === "production") {
+  throw new Error("SESSION_SECRET must be set in production.");
+}
+if (!sessionSecret) {
   console.warn(
     "Warning: SESSION_SECRET is not set in .env — using an insecure default. Set it before deploying."
   );
@@ -22,11 +42,20 @@ if (!process.env.SESSION_SECRET) {
 
 app.use(cors());
 app.use(express.json());
+app.use((_req: Request, _res: Response, next) => {
+  void ensureStoreConnected().then(() => next()).catch(next);
+});
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "dev-only-insecure-secret",
+    secret: sessionSecret || "dev-only-insecure-secret",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/portfolio",
+      ...(process.env.MONGODB_DB ? { dbName: process.env.MONGODB_DB } : {}),
+      collectionName: "sessions",
+      ttl: 60 * 60 * 8,
+    }),
     cookie: {
       httpOnly: true,
       // Set SESSION_SECURE_COOKIE=true in .env once the site is served over HTTPS.
@@ -53,7 +82,7 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 async function startServer(): Promise<void> {
-  await connectStore();
+  await ensureStoreConnected();
   const server = app.listen(PORT, () => {
     console.log(`Portfolio server running at http://localhost:${PORT}`);
   });
@@ -82,7 +111,11 @@ async function startServer(): Promise<void> {
   }
 }
 
-startServer().catch((error: unknown) => {
-  console.error("Unable to start the server:", error);
-  process.exit(1);
-});
+if (!process.env.VERCEL) {
+  startServer().catch((error: unknown) => {
+    console.error("Unable to start the server:", error);
+    process.exit(1);
+  });
+}
+
+export default app;

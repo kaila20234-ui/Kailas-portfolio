@@ -29,6 +29,7 @@
     <button type="button" class="admin-tab" id="tab-projects" role="tab" aria-controls="projects" aria-selected="true" data-tab="projects">Projects</button>
     <button type="button" class="admin-tab" id="tab-contacts" role="tab" aria-controls="contacts" aria-selected="false" tabindex="-1" data-tab="contacts">Contact inbox <span id="unreadBadge" class="nav-count">0</span></button>
     <button type="button" class="admin-tab" id="tab-experience" role="tab" aria-controls="experience" aria-selected="false" tabindex="-1" data-tab="experience">Experience</button>
+    <button type="button" class="admin-tab" id="tab-apk-uploads" role="tab" aria-controls="apk-uploads" aria-selected="false" tabindex="-1" data-tab="apk-uploads">APK uploads</button>
     <button type="button" class="admin-tab" id="tab-uploads" role="tab" aria-controls="uploads" aria-selected="false" tabindex="-1" data-tab="uploads">Uploads</button>
   </nav>
 
@@ -116,6 +117,36 @@
     </div>
   </section>
 
+  <!-- APK UPLOADS -->
+  <section class="admin-panel" id="apk-uploads" role="tabpanel" aria-labelledby="tab-apk-uploads" hidden>
+    <div class="panel-heading">
+      <div>
+        <p class="admin-kicker">Project downloads</p>
+        <h2>Upload an Android APK</h2>
+      </div>
+    </div>
+    <form class="admin-form" id="apkUploadForm">
+      <div class="full">
+        <label for="apk-project">Project</label>
+        <select id="apk-project" required>
+          <option value="">Choose a project</option>
+        </select>
+        <p class="admin-row-sub" id="apk-project-status">Choose a project to see whether it already has an APK.</p>
+      </div>
+      <div class="full">
+        <label for="apk-file">Android APK (max 100MB)</label>
+        <input type="file" id="apk-file" accept=".apk,application/vnd.android.package-archive" required>
+      </div>
+      <div class="full-actions">
+        <button type="submit" class="btn btn-primary" id="apkUploadSubmit">Upload APK</button>
+        <span class="form-status" id="apkUploadStatus" role="status" aria-live="polite"></span>
+      </div>
+    </form>
+    <p class="empty-msg" style="margin-top:14px;">
+      The APK will be attached to the selected project and visitors can download it from that project card.
+    </p>
+  </section>
+
   <!-- EXPERIENCE -->
   <section class="admin-panel" id="experience" role="tabpanel" aria-labelledby="tab-experience" hidden>
     <div class="panel-heading">
@@ -173,7 +204,7 @@
     </div>
     <form class="admin-form" id="uploadForm">
       <div class="full">
-        <label for="u-file">File (PNG, JPG, WEBP, or PDF — max 5MB)</label>
+        <label for="u-file">File (PNG, JPG, WEBP, or PDF — max 4MB)</label>
         <input type="file" id="u-file" accept=".png,.jpg,.jpeg,.webp,.pdf" required>
       </div>
       <div class="full-actions">
@@ -277,6 +308,11 @@
       return;
     }
     projectsById = new Map(projects.map(project => [project.id, project]));
+    const apkProjectSelect = document.getElementById('apk-project');
+    const selectedApkProjectId = apkProjectSelect.value;
+    apkProjectSelect.innerHTML = '<option value="">Choose a project</option>' +
+      projects.map(project => `<option value="${escapeHtml(project.id)}">${escapeHtml(project.name)}</option>`).join('');
+    if (projectsById.has(selectedApkProjectId)) apkProjectSelect.value = selectedApkProjectId;
     document.getElementById('projectCount').textContent = projects.length;
     if (!projects.length) {
       list.innerHTML = '<p class="empty-msg">No projects yet — add one below.</p>';
@@ -571,6 +607,86 @@
   }
 
   document.getElementById('refreshContacts').addEventListener('click', loadContacts);
+
+  // ---- APK uploads ----
+  const apkProjectSelect = document.getElementById('apk-project');
+  apkProjectSelect.addEventListener('change', () => {
+    const project = projectsById.get(apkProjectSelect.value);
+    document.getElementById('apk-project-status').textContent = !project
+      ? 'Choose a project to see whether it already has an APK.'
+      : project.apkUrl
+        ? 'This project already has an APK. Uploading a new file will replace its download link.'
+        : 'No APK is attached to this project yet.';
+  });
+
+  document.getElementById('apkUploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const status = document.getElementById('apkUploadStatus');
+    const submit = document.getElementById('apkUploadSubmit');
+    const file = document.getElementById('apk-file').files[0];
+    const project = projectsById.get(apkProjectSelect.value);
+    status.textContent = '';
+    status.className = 'form-status';
+    if (!project || !file) return;
+    if (!file.name.toLowerCase().endsWith('.apk')) {
+      status.textContent = 'Please select an Android APK file.';
+      status.classList.add('error');
+      return;
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      status.textContent = 'APK files must be 100MB or smaller.';
+      status.classList.add('error');
+      return;
+    }
+
+    submit.disabled = true;
+    try {
+      status.textContent = 'Preparing APK upload…';
+      const upload = await api('/api/admin/apk-upload-signature', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('api_key', upload.apiKey);
+      formData.append('timestamp', upload.timestamp);
+      formData.append('folder', upload.folder);
+      formData.append('public_id', upload.publicId);
+      formData.append('signature', upload.signature);
+
+      status.textContent = 'Uploading APK…';
+      const uploadResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${encodeURIComponent(upload.cloudName)}/raw/upload`,
+        { method: 'POST', body: formData }
+      );
+      const uploadResult = await uploadResponse.json().catch(() => ({}));
+      if (!uploadResponse.ok) {
+        throw new Error(uploadResult.error?.message || 'APK upload failed.');
+      }
+      if (typeof uploadResult.secure_url !== 'string') {
+        throw new Error('Cloudinary did not return an APK download URL.');
+      }
+
+      status.textContent = 'Attaching APK to project…';
+      await api(`/api/admin/projects/${encodeURIComponent(project.id)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ apkUrl: uploadResult.secure_url }),
+      });
+      status.textContent = `APK uploaded for ${project.name}.`;
+      status.classList.add('success');
+      document.getElementById('apkUploadForm').reset();
+      document.getElementById('apk-project-status').textContent =
+        'Choose a project to see whether it already has an APK.';
+      await loadProjects();
+      apkProjectSelect.value = project.id;
+      apkProjectSelect.dispatchEvent(new Event('change'));
+    } catch (err) {
+      status.textContent = err.message;
+      status.classList.add('error');
+    } finally {
+      submit.disabled = false;
+    }
+  });
 
   // ---- Upload ----
   document.getElementById('uploadForm').addEventListener('submit', async (e) => {
