@@ -32,8 +32,24 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     return;
   }
 
-  req.session.isAdmin = true;
-  res.json({ success: true });
+  req.session.regenerate((regenerateError) => {
+    if (regenerateError) {
+      console.error("Unable to regenerate admin session:", regenerateError);
+      res.status(500).json({ success: false, message: "Unable to start an admin session." });
+      return;
+    }
+
+    req.session.isAdmin = true;
+    req.session.save((saveError) => {
+      if (saveError) {
+        console.error("Unable to save admin session:", saveError);
+        res.status(500).json({ success: false, message: "Unable to start an admin session." });
+        return;
+      }
+
+      res.json({ success: true });
+    });
+  });
 });
 
 // POST /admin/logout — end the session
